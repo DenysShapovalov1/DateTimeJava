@@ -1,0 +1,162 @@
+import java.util.Random;
+
+public class DateTime {
+    private int year;
+    private int month;
+    private int day;
+    private int hour;
+    private int minute;
+    private boolean is24HourFormat = true;
+
+    public DateTime(int year, int month, int day, int hour, int minute) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    public DateTime(int year, int month, int day) {
+        this(year, month, day, 0, 0);
+    }
+
+    public DateTime(int hour, int minute) {
+        this.year = 2024;
+        this.month = 11;
+        this.day = 14;
+        this.hour = hour;
+        this.minute = minute;
+    }
+
+    public DateTime(int year, int month, int day, int hour, int minute, String period) {
+        this(year, month, day, convertTo24Hour(hour, period), minute);
+    }
+
+    public DateTime(int hour, int minute, String period) {
+        this(convertTo24Hour(hour, period), minute);
+    }
+
+    private void setProjectStartDateTime() {
+        this.year = 2024;
+        this.month = 11;
+        this.day = 14;
+        this.hour = 0;
+        this.minute = 0;
+    }
+
+    private static int convertTo24Hour(int hour, String period) {
+        if (period.equalsIgnoreCase("PM") && hour < 12) {
+            return hour + 12;
+        } else if (period.equalsIgnoreCase("AM") && hour == 12) {
+            return 0;
+        }
+        return hour;
+    }
+
+    public void displayDateTime() {
+        String formattedDate = String.format("%04d-%02d-%02d", year, month, day);
+        String formattedTime = is24HourFormat
+                ? String.format("%02d:%02d", hour, minute)
+                : String.format("%02d:%02d %s", (hour % 12 == 0 ? 12 : hour % 12), minute, (hour < 12 ? "AM" : "PM"));
+        System.out.println("Data: " + formattedDate + ", Czas: " + formattedTime);
+    }
+
+    public void changeDate(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        displayDateTime();
+    }
+
+    public void changeTime(int hour, int minute) {
+        this.hour = hour;
+        this.minute = minute;
+        displayDateTime();
+    }
+
+    public void toggleClockFormat() {
+        is24HourFormat = !is24HourFormat;
+        displayDateTime();
+    }
+
+    public boolean isAfter(DateTime other) {
+        if (this.year > other.year) {
+            return true;
+        } else if (this.year == other.year) {
+            if (this.month > other.month) {
+                return true;
+            } else if (this.month == other.month) {
+                if (this.day > other.day) {
+                    return true;
+                } else if (this.day == other.day) {
+                    if (this.hour > other.hour) {
+                        return true;
+                    } else if (this.hour == other.hour) {
+                        if (this.minute > other.minute) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public void setRandomDateTime() {
+        Random rand = new Random();
+        this.year = rand.nextInt(9999 - 1) + 1;
+        this.month = rand.nextInt(12) + 1;
+        this.day = rand.nextInt(28) + 1;
+        this.hour = rand.nextInt(24);
+        this.minute = rand.nextInt(60);
+        displayDateTime();
+    }
+
+    public void displayMonthInRoman(boolean isRoman) {
+        String monthRoman = "";
+        if (isRoman) {
+            switch (month) {
+                case 1: monthRoman = "I"; break;
+                case 2: monthRoman = "II"; break;
+                case 3: monthRoman = "III"; break;
+                case 4: monthRoman = "IV"; break;
+                case 5: monthRoman = "V"; break;
+                case 6: monthRoman = "VI"; break;
+                case 7: monthRoman = "VII"; break;
+                case 8: monthRoman = "VIII"; break;
+                case 9: monthRoman = "IX"; break;
+                case 10: monthRoman = "X"; break;
+                case 11: monthRoman = "XI"; break;
+                case 12: monthRoman = "XII"; break;
+                default: monthRoman = "Nieprawidłowy miesiąc"; break;
+            }
+            System.out.println("Miesiąc (rzymskimi): " + monthRoman);
+        } else {
+            System.out.println("Miesiąc (arabskim): " + month);
+        }
+    }
+
+    public static void main(String[] args) {
+        DateTime dt1 = new DateTime(2024, 11, 20, 15, 30);
+        dt1.displayDateTime();
+
+        DateTime dt2 = new DateTime(2024, 11, 20);
+        dt2.displayDateTime();
+
+        DateTime dt3 = new DateTime(10, 45, "PM");
+        dt3.displayDateTime();
+
+        dt3.toggleClockFormat();
+
+        DateTime dt4 = new DateTime(7, 15);
+        dt4.displayDateTime();
+
+        dt4.changeDate(2025, 12, 25);
+        dt4.changeTime(14, 0);
+
+        System.out.println("Czy dt4 jest po dt1? " + dt4.isAfter(dt1));
+
+        dt4.setRandomDateTime();
+        dt4.displayMonthInRoman(true);
+    }
+}
