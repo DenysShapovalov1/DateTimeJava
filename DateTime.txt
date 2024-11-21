@@ -9,11 +9,17 @@ public class DateTime {
     private boolean is24HourFormat = true;
 
     public DateTime(int year, int month, int day, int hour, int minute) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.hour = hour;
-        this.minute = minute;
+        if (!validateYear(year) || !validateMonth(month) || !validateDay(day, month, year) ||
+                !validateHour(hour) || !validateMinute(minute)) {
+            setProjectStartDateTime();
+        } else {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+            this.hour = hour;
+            this.minute = minute;
+        }
+        displayDateTime();
     }
 
     public DateTime(int year, int month, int day) {
@@ -21,11 +27,7 @@ public class DateTime {
     }
 
     public DateTime(int hour, int minute) {
-        this.year = 2024;
-        this.month = 11;
-        this.day = 14;
-        this.hour = hour;
-        this.minute = minute;
+        this(2024, 11, 14, hour, minute);
     }
 
     public DateTime(int year, int month, int day, int hour, int minute, String period) {
@@ -33,10 +35,11 @@ public class DateTime {
     }
 
     public DateTime(int hour, int minute, String period) {
-        this(convertTo24Hour(hour, period), minute);
+        this(2024, 11, 14, convertTo24Hour(hour, period), minute);
     }
 
     private void setProjectStartDateTime() {
+        System.out.println("Nieprawidłowe dane. Ustawiono datę rozpoczęcia projektu.");
         this.year = 2024;
         this.month = 11;
         this.day = 14;
@@ -62,15 +65,23 @@ public class DateTime {
     }
 
     public void changeDate(int year, int month, int day) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
+        if (validateYear(year) && validateMonth(month) && validateDay(day, month, year)) {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+        } else {
+            System.out.println("Nieprawidłowa data. Zmiany nie zostały zastosowane.");
+        }
         displayDateTime();
     }
 
     public void changeTime(int hour, int minute) {
-        this.hour = hour;
-        this.minute = minute;
+        if (validateHour(hour) && validateMinute(minute)) {
+            this.hour = hour;
+            this.minute = minute;
+        } else {
+            System.out.println("Nieprawidłowy czas. Zmiany nie zostały zastosowane.");
+        }
         displayDateTime();
     }
 
@@ -92,9 +103,7 @@ public class DateTime {
                     if (this.hour > other.hour) {
                         return true;
                     } else if (this.hour == other.hour) {
-                        if (this.minute > other.minute) {
-                            return true;
-                        }
+                        return this.minute > other.minute;
                     }
                 }
             }
@@ -128,12 +137,37 @@ public class DateTime {
                 case 10: monthRoman = "X"; break;
                 case 11: monthRoman = "XI"; break;
                 case 12: monthRoman = "XII"; break;
-                default: monthRoman = "Nieprawidłowy miesiąc"; break;
+                default: monthRoman = "Błąd"; break;
             }
-            System.out.println("Miesiąc (rzymskimi): " + monthRoman);
+            System.out.println("Miesiąc (rzymskie): " + monthRoman);
         } else {
-            System.out.println("Miesiąc (arabskim): " + month);
+            System.out.println("Miesiąc (arabskie): " + month);
         }
+    }
+
+    private boolean validateYear(int year) {
+        return year > 0 && year <= 9999;
+    }
+
+    private boolean validateMonth(int month) {
+        return month > 0 && month <= 12;
+    }
+
+    private boolean validateDay(int day, int month, int year) {
+        int[] daysInMonth = {31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        return day > 0 && day <= daysInMonth[month - 1];
+    }
+
+    private boolean validateHour(int hour) {
+        return hour >= 0 && hour < 24;
+    }
+
+    private boolean validateMinute(int minute) {
+        return minute >= 0 && minute < 60;
+    }
+
+    private boolean isLeapYear(int year) {
+        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
 
     public static void main(String[] args) {
@@ -154,7 +188,7 @@ public class DateTime {
         dt4.changeDate(2025, 12, 25);
         dt4.changeTime(14, 0);
 
-        System.out.println("Czy dt4 jest po dt1? " + dt4.isAfter(dt1));
+        System.out.println("dt4 później niż dt1? " + dt4.isAfter(dt1));
 
         dt4.setRandomDateTime();
         dt4.displayMonthInRoman(true);
